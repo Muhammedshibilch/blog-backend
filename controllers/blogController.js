@@ -35,7 +35,9 @@ console.log("inside getUserBlogController");
 const userId=req.userId
 
 try{
-    const allUserBlogs = await blogs.find({userId})
+    // const allUserBlogs = await blogs.find({userId})
+    const allUserBlogs = await blogs.find({ userId }).populate("userId", "username");
+
     res.status(200).json(allUserBlogs)
 
 }catch(err){
@@ -49,7 +51,9 @@ exports.getAllBlogController= async(req,res)=>{
     console.log("inside getAllBlogController");
     
     try{
-        const allBlogs = await blogs.find()
+        // const allBlogs = await blogs.find()
+        const allBlogs = await blogs.find().populate("userId", "username");
+
         res.status(200).json(allBlogs)
     
     }catch(err){
@@ -101,12 +105,71 @@ exports.deleteBlogcontroller = async(req,res)=>{
 // like
 exports.likeBlog = async (req, res) => {
     const { id } = req.params;
+    const userId = req.userId; // Ensure this is correct
+
     try {
         const blog = await blogs.findById(id);
+        if (!blog) {
+            return res.status(404).json({ message: "Blog not found" });
+        }
+
+        if (blog.likedBy.includes(userId)) {
+            return res.status(400).json({ message: "You have already liked this blog" });
+        }
+
         blog.likes += 1;
+        blog.likedBy.push(userId);
         await blog.save();
-        res.status(200).json(blog);
+
+        res.status(200).json({ message: "Blog liked successfully", likes: blog.likes });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
+// // Add comment to a blog
+// exports.addComment = async (req, res) => {
+//     const { id } = req.params; // Blog ID
+//     const { text } = req.body;
+//     const userId = req.userId; // From JWT middleware
+
+//     try {
+//         const blog = await Blogs.findById(id).populate('userId', 'username');
+
+//         if (!blog) {
+//             return res.status(404).json({ message: "Blog not found" });
+//         }
+
+//         const newComment = {
+//             userId,
+//             username: req.username, // Assuming username is stored in req
+//             text
+//         };
+
+//         blog.comments.push(newComment);
+//         await blog.save();
+
+//         res.status(200).json(blog.comments);
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// };
+
+// // Fetch comments for a blog
+// exports.getComments = async (req, res) => {
+//     const { id } = req.params;
+
+//     try {
+//         const blog = await Blogs.findById(id).populate('comments.userId', 'username');
+
+//         if (!blog) {
+//             return res.status(404).json({ message: "Blog not found" });
+//         }
+
+//         res.status(200).json(blog.comments);
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// };
+
+

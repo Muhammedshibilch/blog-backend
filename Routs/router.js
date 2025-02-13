@@ -18,7 +18,8 @@ router.post('/login',userController.loginController)
 router.post('/add-blog',jwtMiddleWare,multerMiddleware.single('blogImage'),blogController.addBlogController)
 
 // like blog
-router.patch('/blogs/like/:id', blogController.likeBlog);
+// Like a blog 
+router.patch('/blogs/like/:id', jwtMiddleWare, blogController.likeBlog);
 
 // user blog
 router.get('/user-blog',jwtMiddleWare,blogController.getUserBlogController)
@@ -35,6 +36,15 @@ router.delete('/blogs/:id/remove',jwtMiddleWare,blogController.deleteBlogcontrol
 
 // edit profile
 router.put('/user/edit',jwtMiddleWare,multerMiddleware.single('profilepic'),userController.editUserController)
+
+
+
+
+// // Add comment
+// router.post('/blogs/:id/comment', jwtMiddleWare, blogController.addComment);
+
+// // Get comments
+// router.get('/blogs/:id/comments', jwtMiddleWare, blogController.getComments);
 
 
 module.exports =router
